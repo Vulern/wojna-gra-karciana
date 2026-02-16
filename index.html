@@ -27,7 +27,26 @@
     <div id="playerHand" class="hand"></div>
 
     <button id="restartButton" style="display:none;">Nowa gra</button>
+    <button id="rulesButton">Zasady</button>
 
+</div>
+
+<!-- Modal z zasadami -->
+<div id="rulesModal" class="modal">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2>Zasady gry Wojna 2.1</h2>
+        <ul>
+            <li>Każdy gracz ma rękę 5 kart.</li>
+            <li>Gracz wybiera, którą kartę zagra.</li>
+            <li>Komputer losuje kartę ze swojej ręki.</li>
+            <li>Wyższa karta wygrywa rundę → 1 punkt.</li>
+            <li>Remis = WOJNA → obaj dobierają dodatkową kartę, wygrany dostaje 2 punkty.</li>
+            <li>Po każdej rundzie ręka jest uzupełniana do 5 kart.</li>
+            <li>Gra trwa 30 rund lub do wyczerpania talii.</li>
+            <li>Wygrywa gracz z większą liczbą punktów.</li>
+        </ul>
+    </div>
 </div>
 
 <script src="script.js"></script>
