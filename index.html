@@ -2,29 +2,51 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Wojna - Gra Karciana</title>
+    <title>Wojna 2.1 - Gra Karciana</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>🃏 WOJNA 🃏</h1>
+<h1>🃏 WOJNA 2.1 🃏</h1>
 
 <div class="table">
 
-    <div class="info">Komputer: <span id="computerCount">26</span> kart</div>
-
-    <div class="cards-area">
-        <div id="playerCard" class="card"></div>
-        <div id="computerCard" class="card"></div>
+    <div class="scores">
+        <div>Gracz: <span id="playerScore">0</span> pkt</div>
+        <div>Komputer: <span id="computerScore">0</span> pkt</div>
     </div>
 
-    <div class="info">Gracz: <span id="playerCount">26</span> kart</div>
+    <div class="cards-area">
+        <div id="playerTable" class="table-slot"></div>
+        <div id="computerTable" class="table-slot"></div>
+    </div>
 
-    <button id="playButton">Zagraj kartę</button>
+    <div id="message" class="info"></div>
+    <div class="info">Runda: <span id="roundCount">0</span> / 30</div>
 
-    <div class="info" id="message"></div>
-    <div class="info">Runda: <span id="roundCount">0</span></div>
+    <div id="playerHand" class="hand"></div>
 
+    <button id="restartButton" style="display:none;">Nowa gra</button>
+    <button id="rulesButton">Zasady</button>
+
+</div>
+
+<!-- Modal z zasadami -->
+<div id="rulesModal" class="modal">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2>Zasady gry Wojna 2.1</h2>
+        <ul>
+            <li>Każdy gracz ma rękę 5 kart.</li>
+            <li>Gracz wybiera, którą kartę zagra.</li>
+            <li>Komputer losuje kartę ze swojej ręki.</li>
+            <li>Wyższa karta wygrywa rundę → 1 punkt.</li>
+            <li>Remis = WOJNA → obaj dobierają dodatkową kartę, wygrany dostaje 2 punkty.</li>
+            <li>Po każdej rundzie ręka jest uzupełniana do 5 kart.</li>
+            <li>Gra trwa 30 rund lub do wyczerpania talii.</li>
+            <li>Wygrywa gracz z większą liczbą punktów.</li>
+        </ul>
+    </div>
 </div>
 
 <script src="script.js"></script>

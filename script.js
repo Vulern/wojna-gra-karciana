@@ -1,35 +1,34 @@
 const suits = ["♠","♥","♦","♣"];
 const values = [2,3,4,5,6,7,8,9,10,11,12,13,14];
+const maxRounds = 30;
+const handSize = 5;
 
-let deck = [];
-let player = [];
-let computer = [];
 let round = 0;
+let playerScore = 0;
+let computerScore = 0;
 
-const playerCardDiv = document.getElementById("playerCard");
-const computerCardDiv = document.getElementById("computerCard");
-const messageDiv = document.getElementById("message");
-const playerCountSpan = document.getElementById("playerCount");
-const computerCountSpan = document.getElementById("computerCount");
+let playerDeck = [];
+let computerDeck = [];
+let playerHand = [];
+let computerHand = [];
+
+const playerScoreSpan = document.getElementById("playerScore");
+const computerScoreSpan = document.getElementById("computerScore");
 const roundSpan = document.getElementById("roundCount");
-const playButton = document.getElementById("playButton");
+const messageDiv = document.getElementById("message");
+const playerHandDiv = document.getElementById("playerHand");
+const playerTableDiv = document.getElementById("playerTable");
+const computerTableDiv = document.getElementById("computerTable");
+const restartButton = document.getElementById("restartButton");
 
-function createDeck() {
-    deck = [];
-    for (let v of values) {
-        for (let s of suits) {
-            deck.push({value: v, suit: s});
-        }
-    }
-    deck.sort(() => Math.random() - 0.5);
-}
+// Modal zasady
+const rulesButton = document.getElementById("rulesButton");
+const rulesModal = document.getElementById("rulesModal");
+const closeModal = document.getElementById("closeModal");
 
-function initGame() {
-    createDeck();
-    player = deck.slice(0,26);
-    computer = deck.slice(26);
-    updateCounts();
-}
+rulesButton.addEventListener("click", () => rulesModal.style.display="block");
+closeModal.addEventListener("click", () => rulesModal.style.display="none");
+window.addEventListener("click", e => { if(e.target === rulesModal) rulesModal.style.display="none"; });
 
 function valueToText(v) {
     if (v === 11) return "J";
@@ -39,77 +38,135 @@ function valueToText(v) {
     return v;
 }
 
-function showCard(element, card) {
-    element.classList.remove("show");
-    setTimeout(() => {
-        element.textContent = valueToText(card.value) + card.suit;
-        element.className = "card show";
-        if (card.suit === "♥" || card.suit === "♦") {
-            element.classList.add("red");
+function createDeck() {
+    const deck = [];
+    for(let v of values){
+        for(let s of suits){
+            deck.push({value:v,suit:s});
         }
-    }, 100);
+    }
+    return deck.sort(()=>Math.random()-0.5);
 }
 
-function playRound(pile = []) {
-
-    if (player.length === 0 || computer.length === 0) {
-        endGame();
-        return;
+function drawHand(deck) {
+    const hand = [];
+    while(hand.length < handSize && deck.length > 0){
+        hand.push(deck.shift());
     }
+    return hand;
+}
+
+function renderHand(){
+    playerHandDiv.innerHTML = '';
+    playerHand.forEach((card, idx)=>{
+        const cardDiv = document.createElement("div");
+        cardDiv.className="card show";
+        cardDiv.textContent=valueToText(card.value)+card.suit;
+        if(card.suit==="♥"||card.suit==="♦") cardDiv.classList.add("red");
+        cardDiv.addEventListener("click", ()=>playRound(idx));
+        playerHandDiv.appendChild(cardDiv);
+    });
+}
+
+function computerPlay(){
+    const idx=Math.floor(Math.random()*computerHand.length);
+    return computerHand.splice(idx,1)[0];
+}
+
+function playRound(playerIdx){
+    if(round>=maxRounds) return;
 
     round++;
-    roundSpan.textContent = round;
-    messageDiv.innerHTML = "";
+    roundSpan.textContent=round;
 
-    let playerCard = player.shift();
-    let computerCard = computer.shift();
+    const playerCard = playerHand.splice(playerIdx,1)[0];
+    const computerCard = computerPlay();
 
-    pile.push(playerCard, computerCard);
+    playerTableDiv.innerHTML='';
+    computerTableDiv.innerHTML='';
 
-    showCard(playerCardDiv, playerCard);
-    showCard(computerCardDiv, computerCard);
+    const pDiv=document.createElement("div");
+    pDiv.className="card show";
+    pDiv.textContent=valueToText(playerCard.value)+playerCard.suit;
+    if(playerCard.suit==="♥"||playerCard.suit==="♦") pDiv.classList.add("red");
+    playerTableDiv.appendChild(pDiv);
 
-    setTimeout(() => {
-        if (playerCard.value > computerCard.value) {
-            player.push(...pile);
-            messageDiv.textContent = "Gracz wygrywa rundę!";
-        } else if (playerCard.value < computerCard.value) {
-            computer.push(...pile);
-            messageDiv.textContent = "Komputer wygrywa rundę!";
+    const cDiv=document.createElement("div");
+    cDiv.className="card show";
+    cDiv.textContent=valueToText(computerCard.value)+computerCard.suit;
+    if(computerCard.suit==="♥"||computerCard.suit==="♦") cDiv.classList.add("red");
+    computerTableDiv.appendChild(cDiv);
+
+    setTimeout(()=>{
+        let winner = null;
+        if(playerCard.value>computerCard.value) winner="player";
+        else if(playerCard.value<computerCard.value) winner="computer";
+
+        if(winner==="player"){
+            playerScore++;
+            pDiv.classList.add("win");
+            messageDiv.textContent="Gracz wygrywa rundę!";
+        } else if(winner==="computer"){
+            computerScore++;
+            cDiv.classList.add("win");
+            messageDiv.textContent="Komputer wygrywa rundę!";
         } else {
-            messageDiv.innerHTML = "<span class='war'>WOJNA!</span>";
-            if (player.length < 2 || computer.length < 2) {
-                endGame();
-                return;
-            }
-            setTimeout(() => playRound(pile), 1000);
-            return;
+            messageDiv.innerHTML="<span class='war'>WOJNA! +2 pkt zwycięzca</span>";
+            const playerCard2 = playerHand.shift() || {value:0,suit:"♠"};
+            const computerCard2 = computerPlay() || {value:0,suit:"♠"};
+
+            const pDiv2=document.createElement("div");
+            pDiv2.className="card show win";
+            pDiv2.textContent=valueToText(playerCard2.value)+playerCard2.suit;
+            playerTableDiv.appendChild(pDiv2);
+
+            const cDiv2=document.createElement("div");
+            cDiv2.className="card show win";
+            cDiv2.textContent=valueToText(computerCard2.value)+computerCard2.suit;
+            computerTableDiv.appendChild(cDiv2);
+
+            if(playerCard2.value>computerCard2.value) playerScore+=2;
+            else if(playerCard2.value<computerCard2.value) computerScore+=2;
         }
 
-        updateCounts();
-        checkWinner();
-    }, 800);
+        playerScoreSpan.textContent=playerScore;
+        computerScoreSpan.textContent=computerScore;
+
+        while(playerHand.length<handSize && playerDeck.length>0) playerHand.push(playerDeck.shift());
+        while(computerHand.length<handSize && computerDeck.length>0) computerHand.push(computerDeck.shift());
+
+        renderHand();
+
+        if(round>=maxRounds || (playerHand.length===0 && playerDeck.length===0)) endGame();
+    }, 500);
 }
 
-function updateCounts() {
-    playerCountSpan.textContent = player.length;
-    computerCountSpan.textContent = computer.length;
+function endGame(){
+    playerHandDiv.innerHTML='';
+    restartButton.style.display="inline-block";
+    if(playerScore>computerScore) messageDiv.innerHTML="<h2>🏆 Gracz wygrywa całą grę!</h2>";
+    else if(playerScore<computerScore) messageDiv.innerHTML="<h2>💻 Komputer wygrywa całą grę!</h2>";
+    else messageDiv.innerHTML="<h2>🤝 Remis!</h2>";
 }
 
-function checkWinner() {
-    if (player.length === 0 || computer.length === 0) {
-        endGame();
-    }
+function startGame(){
+    round=0;
+    playerScore=0;
+    computerScore=0;
+    playerDeck=createDeck();
+    computerDeck=createDeck();
+    playerHand=drawHand(playerDeck);
+    computerHand=drawHand(computerDeck);
+    renderHand();
+    roundSpan.textContent=round;
+    playerScoreSpan.textContent=playerScore;
+    computerScoreSpan.textContent=computerScore;
+    messageDiv.textContent="";
+    playerTableDiv.innerHTML="";
+    computerTableDiv.innerHTML="";
+    restartButton.style.display="none";
 }
 
-function endGame() {
-    playButton.disabled = true;
-    let msg = player.length > computer.length 
-        ? "🏆 Gracz wygrywa całą grę!" 
-        : "💻 Komputer wygrywa całą grę!";
-    messageDiv.innerHTML = "<h2>" + msg + "</h2>";
-}
+restartButton.addEventListener("click", startGame);
 
-playButton.addEventListener("click", () => playRound());
-
-initGame();
+startGame();
